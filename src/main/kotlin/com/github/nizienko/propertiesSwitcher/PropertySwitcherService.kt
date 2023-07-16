@@ -166,7 +166,8 @@ internal class PropertySwitcherService(private val project: Project) {
     fun getStatusBarLabel(): String {
         return getSwitchableFiles().flatMap { file ->
             val params = file.readProperties()
-            file.properties.filter { it.showInStatusBar ?: false }.mapNotNull { params.getProperty(it.name) }
+            // file can omit property value. So do output as name+value
+            file.properties.filter { it.showInStatusBar ?: false }.map { it.name+":"+params.getProperty(it.name) }
 
         }.joinToString(" ") { it }
     }
