@@ -150,10 +150,17 @@ internal class PropertySwitcherService(private val project: Project) {
     }
 
     fun getStatusBarToolTip(): String {
-        return getSwitchableFiles().flatMap { file ->
+        // use html for multiline tooltip. + use bold for prop names.
+        return "<html>" + getSwitchableFiles().flatMap { file ->
             val params = file.readProperties()
-            file.properties.map { it.name + ":" + params[it.name] }
-        }.joinToString("\n") { it }  // need to test this separator in tooltip
+            file.properties.map {
+                val n = it.name.replace("&", "&amp;").replace("<", "&lt;")
+                val v = (params[it.name]).toString().replace("&", "&amp;").replace("<", "&lt;")
+                // use <pre> for values to not lost spaces/line feeds.
+                // use bold for property names to not mix with multiline values.
+                "<b>$n: </b><pre>$v</pre></br>"
+            }
+        }.joinToString { it } + "</html>"
     }
 
     fun getStatusBarLabel(): String {
@@ -239,8 +246,12 @@ internal class SwitchablePropertyFile(
         val document = documentManager.getDocument(propertyFile) ?: return
         val content = document.text
         // any whitespace + name + (any name/val separator or line end or EOF)
-        val regex = ("[ \\t\\f]*\\Q$name\\E([ \\t\\f=:]+.*|\\n|$)").toRegex(RegexOption.MULTILINE)
-        val updatedContent = content.replace(regex, "$name=$value")
+        //val regex = ("[ \\t\\f]*\\Q$name\\E([ \\t\\f=:]+.*|\\n|$)").toRegex(RegexOption.MULTILINE)
+        //val updatedContent = content.replace(regex, "$name=$value")
+
+        // try to preserve formatting for Key: (spaces before/after): replace the value only
+        val regex = ("""([ \t\f]*\Q$name\E([ \t\f]*[=:][ \t\f]*|[ \t\f]+|)).*""").toRegex(RegexOption.MULTILINE)
+        val updatedContent = content.replace(regex, "$1$value")
         ApplicationManager.getApplication().invokeLater {
             ApplicationManager.getApplication().runWriteAction {
                 document.setText(updatedContent)
