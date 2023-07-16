@@ -9,7 +9,6 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 import com.intellij.vcs.commit.NonModalCommitPanel.Companion.showAbove
-import java.awt.Component
 import javax.swing.JComponent
 
 internal class SwitchPropertiesAction : AnAction() {

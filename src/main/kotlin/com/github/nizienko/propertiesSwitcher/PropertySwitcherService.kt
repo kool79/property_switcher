@@ -21,9 +21,7 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
-import com.intellij.testFramework.utils.vfs.getFile
 import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.CountDownLatch
 
@@ -155,13 +153,13 @@ internal class PropertySwitcherService(private val project: Project) {
         return getSwitchableFiles().flatMap { file ->
             val params = file.readProperties()
             file.properties.map { it.name + ":" + params[it.name] }
-        }.joinToString("; ") { it }
+        }.joinToString("\n") { it }  // need to test this separator in tooltip
     }
 
     fun getStatusBarLabel(): String {
         return getSwitchableFiles().flatMap { file ->
             val params = file.readProperties()
-            file.properties.filter { it.showInStatusBar ?: false }.mapNotNull { params[it.name] }
+            file.properties.filter { it.showInStatusBar ?: false }.mapNotNull { params.getProperty(it.name) }
 
         }.joinToString(" ") { it }
     }
@@ -191,7 +189,12 @@ internal class SwitchablePropertyFile(
     val properties: List<Prop>
         get() = templates.flatMap { it.properties }
 
+    // Add properties to new monitored file
     private fun addMissingProperties(propertyTemplate: PropertiesTemplate) {
+
+        // Do nothings. This code actually corrupts the file: removes all comments, multiline properties etc
+        // We'll update only those properties which exists in a file
+        /*
         val existedProperties = readProperties().toMutableMap()
         propertyTemplate.properties.forEach {
             if (existedProperties.keys.contains(it.name).not()) {
@@ -199,19 +202,18 @@ internal class SwitchablePropertyFile(
             }
         }
         saveProperties(existedProperties)
+         */
     }
 
     private fun notifyChanges() {
         ProjectLocator.getInstance().guessProjectForFile(propertyFile)?.switcher()?.updateWidget()
     }
 
-    internal fun readProperties(): Map<String, String> {
-        return String(propertyFile.contentsToByteArray(), StandardCharsets.UTF_8).split("\n")
-            .filter { it.contains("=") && it.length > 3 }.associate {
-                val key = it.substringBefore("=")
-                val value = it.substringAfter("=", "")
-                key to value
-            }
+      internal fun readProperties(): Properties {
+        // use java Properties file to handle them correctly.
+        val properties = Properties();
+        properties.load(propertyFile.inputStream);
+        return properties
     }
 
     private fun saveProperties(newProperties: Map<String, String>) {
@@ -236,7 +238,9 @@ internal class SwitchablePropertyFile(
         val documentManager = FileDocumentManager.getInstance()
         val document = documentManager.getDocument(propertyFile) ?: return
         val content = document.text
-        val updatedContent = content.replace(("$name=.*").toRegex(), "$name=$value")
+        // any whitespace + name + (any name/val separator or line end or EOF)
+        val regex = ("[ \\t\\f]*\\Q$name\\E([ \\t\\f=:]+.*|\\n|$)").toRegex(RegexOption.MULTILINE)
+        val updatedContent = content.replace(regex, "$name=$value")
         ApplicationManager.getApplication().invokeLater {
             ApplicationManager.getApplication().runWriteAction {
                 document.setText(updatedContent)
