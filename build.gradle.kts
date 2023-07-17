@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.nizienko"
-version = "0.9.2.2"
+version = "0.9.2.3"
 
 repositories {
     mavenCentral()

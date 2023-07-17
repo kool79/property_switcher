@@ -1,5 +1,6 @@
 package com.github.nizienko.propertiesSwitcher.actions
 
+import com.github.nizienko.propertiesSwitcher.Aliases
 import com.github.nizienko.propertiesSwitcher.Prop
 import com.github.nizienko.propertiesSwitcher.SwitchablePropertyFile
 import com.github.nizienko.propertiesSwitcher.switcher
@@ -78,23 +79,24 @@ private fun createPropsPopup(
 internal fun createValuePopup(
     chosenFile: SwitchablePropertyFile,
     chosenProp: Prop
-) = object : BaseListPopupStep<String>(chosenProp.name, chosenProp.options) {
+
+) = object : BaseListPopupStep<Aliases>(chosenProp.name, chosenProp.options) {
     override fun isSpeedSearchEnabled(): Boolean {
         return true
     }
 
-    override fun onChosen(selectedValue: String, finalChoice: Boolean): PopupStep<*>? {
+    override fun onChosen(selectedValue: Aliases, finalChoice: Boolean): PopupStep<*>? {
         if (finalChoice) {
-            chosenFile.updateParameter(chosenProp.name, selectedValue)
+            chosenFile.updateParameter(chosenProp.name, selectedValue.value)
         }
         return FINAL_CHOICE
     }
 
-    override fun hasSubstep(selectedValue: String): Boolean {
+    override fun hasSubstep(selectedValue: Aliases): Boolean {
         return false
     }
 
-    override fun getTextFor(value: String): String {
-        return value
+    override fun getTextFor(value: Aliases): String {
+        return value.alias?:value.value
     }
 }

@@ -76,7 +76,7 @@ internal class PropertySwitcherService(private val project: Project) {
                     data.properties.forEach {
                         append(it.name)
                         append("=")
-                        append(it.options.last())
+                        append(it.options.last().value)
                         append("\n")
                     }
                 }
@@ -122,7 +122,7 @@ internal class PropertySwitcherService(private val project: Project) {
                 require(properties != null) {
                     "properties are missing"
                 }
-                properties.forEach {
+                properties.forEach { it ->
                     require(it.name != null) {
                         "name is missing"
                     }
@@ -131,6 +131,11 @@ internal class PropertySwitcherService(private val project: Project) {
                     }
                     require(it.options.isNotEmpty()) {
                         "${it.name} options are empty"
+                    }
+                    it.options.forEach{
+                        require(it.value != null) {
+                            "propertyValue is missing"
+                        }
                     }
                 }
             }
@@ -155,7 +160,9 @@ internal class PropertySwitcherService(private val project: Project) {
             val params = file.readProperties()
             file.properties.map {
                 val n = it.name.replace("&", "&amp;").replace("<", "&lt;")
-                val v = params[it.name].toString().replace("&", "&amp;").replace("<", "&lt;")
+                val value = params.getProperty(it.name)
+                val alias = getAlias(value, it.options)
+                val v = alias.replace("&", "&amp;").replace("<", "&lt;")
                 // use <pre> for values to not lost spaces/line feeds.
                 // use bold for property names to not mix with multiline values.
                 "<b>$n: </b><pre>$v</pre></br>"
@@ -167,9 +174,16 @@ internal class PropertySwitcherService(private val project: Project) {
         return getSwitchableFiles().flatMap { file ->
             val params = file.readProperties()
             // file can omit property value. So do output as name+value
-            file.properties.filter { it.showInStatusBar ?: false }.map { it.name+":"+params.getProperty(it.name) }
+            file.properties.filter { it.showInStatusBar ?: false }.map {
+                getAlias(params.getProperty(it.name), it.options)
+            }
 
-        }.joinToString(" ") { it }
+        }.joinToString("; ") { it }
+    }
+
+    private fun getAlias(propertyValue: String?, aliases: List<Aliases> ):String{
+        if (propertyValue == null) return "{null}"
+        return aliases.find { it.value == propertyValue}?.alias?:propertyValue
     }
 
     fun updateWidget() {
@@ -268,7 +282,11 @@ internal data class PropertiesTemplate(
 )
 
 internal data class Prop(
-    val name: String, val options: List<String>, val showInStatusBar: Boolean?
+    val name: String, val options: List<Aliases>, val showInStatusBar: Boolean?
+)
+
+internal data class Aliases(
+    val alias: String?, val value: String
 )
 
 internal fun Project.switcher() = service<PropertySwitcherService>()

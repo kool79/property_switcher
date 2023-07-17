@@ -4,18 +4,18 @@
     {
       "name": "property_1",
       "options": [
-        "value_1",
-        "value_2",
-        "value_3"
+        {"alias":  "alias_1", "value":  "value_1"},
+        {"alias":  "alias_2", "value":  "value_2"},
+        {"value":  "value_3"}
       ],
       "showInStatusBar": false
     },
     {
       "name": "property_2",
       "options": [
-        "value_1",
-        "value_2",
-        "value_3"
+        {"alias":  "alias_1", "value":  "value_1"},
+        {"value":  "value_2"},
+        {"value":  "value_3"}
       ],
       "showInStatusBar": true
     }
