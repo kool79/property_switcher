@@ -150,17 +150,17 @@ internal class PropertySwitcherService(private val project: Project) {
     }
 
     fun getStatusBarToolTip(): String {
-        // use html for multiline tooltip. + use bold for prop names.
-        return "<html>" + getSwitchableFiles().flatMap { file ->
+        // use html for multiline tooltip
+        return getSwitchableFiles().flatMap { file ->
             val params = file.readProperties()
             file.properties.map {
                 val n = it.name.replace("&", "&amp;").replace("<", "&lt;")
-                val v = (params[it.name]).toString().replace("&", "&amp;").replace("<", "&lt;")
+                val v = params[it.name].toString().replace("&", "&amp;").replace("<", "&lt;")
                 // use <pre> for values to not lost spaces/line feeds.
                 // use bold for property names to not mix with multiline values.
                 "<b>$n: </b><pre>$v</pre></br>"
             }
-        }.joinToString { it } + "</html>"
+        }.joinToString("", "<html>", "</html>") { it }
     }
 
     fun getStatusBarLabel(): String {
