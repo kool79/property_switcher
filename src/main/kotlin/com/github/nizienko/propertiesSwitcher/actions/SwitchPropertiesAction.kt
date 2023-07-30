@@ -32,7 +32,7 @@ internal class SwitchPropertiesAction : AnAction() {
 }
 
 private fun createSwitchableFilesPopup(
-    options: List<SwitchablePropertyFile>
+        options: List<SwitchablePropertyFile>
 ) = if (options.size != 1) {
     object : BaseListPopupStep<SwitchablePropertyFile>("File", options) {
         override fun isSpeedSearchEnabled(): Boolean {
@@ -57,28 +57,32 @@ private fun createSwitchableFilesPopup(
 
 
 private fun createPropsPopup(
-    chosenFile: SwitchablePropertyFile
-) = object : BaseListPopupStep<Prop>(chosenFile.propertyFile.name, chosenFile.properties) {
-    override fun isSpeedSearchEnabled(): Boolean {
-        return true
-    }
+        chosenFile: SwitchablePropertyFile
+) = if (chosenFile.properties.size != 1) {
+    object : BaseListPopupStep<Prop>(chosenFile.propertyFile.name, chosenFile.properties) {
+        override fun isSpeedSearchEnabled(): Boolean {
+            return true
+        }
 
-    override fun onChosen(selectedValue: Prop, finalChoice: Boolean): PopupStep<*>? {
-        return createValuePopup(chosenFile, selectedValue)
-    }
+        override fun onChosen(selectedValue: Prop, finalChoice: Boolean): PopupStep<*>? {
+            return createValuePopup(chosenFile, selectedValue)
+        }
 
-    override fun hasSubstep(selectedValue: Prop): Boolean {
-        return true
-    }
+        override fun hasSubstep(selectedValue: Prop): Boolean {
+            return true
+        }
 
-    override fun getTextFor(value: Prop): String {
-        return value.name
+        override fun getTextFor(value: Prop): String {
+            return value.name
+        }
     }
+} else {
+    createValuePopup(chosenFile, chosenFile.properties.first())
 }
 
 internal fun createValuePopup(
-    chosenFile: SwitchablePropertyFile,
-    chosenProp: Prop
+        chosenFile: SwitchablePropertyFile,
+        chosenProp: Prop
 
 ) = object : BaseListPopupStep<Aliases>(chosenProp.name, chosenProp.options) {
     override fun isSpeedSearchEnabled(): Boolean {
@@ -97,6 +101,6 @@ internal fun createValuePopup(
     }
 
     override fun getTextFor(value: Aliases): String {
-        return value.alias?:value.value
+        return value.alias ?: value.value
     }
 }
