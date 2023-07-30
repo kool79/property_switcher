@@ -18,12 +18,12 @@ internal class SwitchPropertiesAction : AnAction() {
         val files = service.getSwitchableFiles()
         val popupStep = createSwitchableFilesPopup(files)
         val popup = JBPopupFactory.getInstance().createListPopup(popupStep)
-        val source = e.inputEvent.source
-        if (source is JComponent) {
-            popup.showAbove(source)
-        } else {
+//        val source = e.inputEvent.source
+//        if (source is JComponent) {
+//            popup.showAbove(source)  // this will show popup just above the window if the action is added to toolbar
+//        } else {
             popup.showInBestPositionFor(e.dataContext)
-        }
+//        }
     }
 
     override fun update(e: AnActionEvent) {
