@@ -251,7 +251,7 @@ internal class SwitchablePropertyFile(
         //val updatedContent = content.replace(regex, "$name=$value")
 
         // try to preserve formatting for Key: (spaces before/after): replace the value only
-        val regex = ("""^([ \t\f]*\Q$name\E([ \t\f]*[=:][ \t\f]*|[ \t\f]+|)).*""").toRegex(RegexOption.MULTILINE)
+        val regex = ("""^(\s*\Q$name\E\s*[=:]\s*).*""").toRegex(RegexOption.MULTILINE)
         val updatedContent = content.replace(regex, "$1$value")
         ApplicationManager.getApplication().invokeLater {
             ApplicationManager.getApplication().runWriteAction {
