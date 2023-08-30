@@ -45,7 +45,8 @@ Simplify your property file management, boost productivity, and effortlessly rep
     <actions>
         <action id="com.github.nizienko.propertiesSwitcher.actions.ReloadPropertyTemplatesAction"
                 class="com.github.nizienko.propertiesSwitcher.actions.ReloadPropertyTemplatesAction"
-                text="Reload Property Switcher">
+                text="Reload Property Switcher"
+                icon="MyIcons.SA">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </action>
         <action id="com.github.nizienko.propertiesSwitcher.actions.SwitchPropertiesAction"
