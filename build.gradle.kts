@@ -4,8 +4,8 @@ plugins {
     id("org.jetbrains.intellij") version "1.13.3"
 }
 
-group = "com.github.nizienko"
-version = "0.9.2.7-k"
+group = "com.github.kool79"
+version = "0.9.2.8-k"
 
 repositories {
     mavenCentral()
@@ -37,7 +37,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("231")
-        untilBuild.set("232.*")
+        untilBuild.set("*")
     }
 
     signPlugin {
